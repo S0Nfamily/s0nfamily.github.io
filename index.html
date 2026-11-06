@@ -1,0 +1,653 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow">
+<title>사랑과 행복이 넘치는 우리가족</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Jua&family=Gowun+Dodum&display=swap">
+<style>
+/* ─────────────────────────────────────────────
+   1) 색깔과 글꼴을 "변수"로 정해 두기
+   한 곳에서 바꾸면 사이트 전체 색이 바뀌어요.
+   레이아웃: 왼쪽 큰 달력 + 오른쪽 그날 이야기, 아래 가족 메모장
+   ───────────────────────────────────────────── */
+:root {
+  --bg: #F4F7FF;          /* 배경: 아주 연한 하늘색 */
+  --surface: #FFFFFF;     /* 카드 바탕: 흰색 */
+  --ink: #2A2D45;         /* 글씨 */
+  --muted: #7B809C;       /* 흐린 글씨 */
+  --line: #E2E7F6;        /* 선 */
+  --accent: #FF6B8A;      /* 포인트: 밝은 코랄핑크 */
+  --accent-ink: #FFFFFF;
+  --accent-soft: #FFE6EC;
+  --sun: #FFC23C;         /* 오늘 표시: 햇살 노랑 */
+  --sun-soft: #FFF4D6;
+  --sunday: #EF4E6C;
+  --saturday: #3A7DF0;
+  /* 가족마다 고유 색 */
+  --mom: #FF6FA3;
+  --dad: #3F8CFF;
+  --yushin: #22B07D;
+  --dongwook: #FF8A2B;
+  --font-title: "Jua", "Apple SD Gothic Neo", "Malgun Gothic", sans-serif;
+  --font-body: "Gowun Dodum", "Apple SD Gothic Neo", "Malgun Gothic", sans-serif;
+  --radius: 18px;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #161929; --surface: #212539; --ink: #F1F2FA; --muted: #A2A7C4; --line: #33395A;
+    --accent: #FF86A0; --accent-ink: #1B1D2E; --accent-soft: #46263A; --sun: #FFCF5C; --sun-soft: #3D3520;
+    --sunday: #FF7D93; --saturday: #78A8FF; color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #161929; --surface: #212539; --ink: #F1F2FA; --muted: #A2A7C4; --line: #33395A;
+  --accent: #FF86A0; --accent-ink: #1B1D2E; --accent-soft: #46263A; --sun: #FFCF5C; --sun-soft: #3D3520;
+  --sunday: #FF7D93; --saturday: #78A8FF; color-scheme: dark;
+}
+
+/* ─────────────────────────────────────────────
+   2) 기본 모양
+   ───────────────────────────────────────────── */
+* { box-sizing: border-box; }
+body {
+  background: var(--bg);
+  color: var(--ink);
+  font-family: var(--font-body);
+  font-size: 16px;
+  line-height: 1.55;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+  padding-block: 20px 40px;
+}
+h1, h2, h3 { font-family: var(--font-title); font-weight: 400; margin: 0; text-wrap: balance; }
+button, input, textarea { font: inherit; color: inherit; }
+button { cursor: pointer; }
+:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
+.wrap { max-width: 1120px; margin: 0 auto; display: grid; gap: 20px; }
+
+.btn {
+  border: 0; border-radius: 999px; padding: 10px 18px;
+  background: var(--accent); color: var(--accent-ink); font-family: var(--font-title); font-size: 17px;
+  transition: transform .12s ease;
+}
+.btn:hover { transform: translateY(-1px); }
+.btn:disabled { opacity: .5; cursor: default; transform: none; }
+.btn.ghost { background: transparent; color: var(--muted); border: 1.5px solid var(--line); font-size: 15px; padding: 7px 14px; }
+.field {
+  width: 100%; border: 1.5px solid var(--line); border-radius: 12px; padding: 10px 12px;
+  background: var(--bg);
+}
+.field:focus { border-color: var(--accent); outline: none; }
+textarea.field { resize: vertical; min-height: 70px; }
+.hint { color: var(--muted); font-size: 14px; margin: 0; }
+.err { color: var(--sunday); font-size: 14px; margin: 0; min-height: 1.2em; }
+
+/* ─────────────────────────────────────────────
+   3) 비밀번호 화면
+   ───────────────────────────────────────────── */
+.lock {
+  min-height: 80vh; display: grid; place-items: center;
+}
+.lock-card {
+  width: min(400px, 100%); background: var(--surface); border-radius: 28px; padding: 32px 26px;
+  display: grid; gap: 14px; text-align: center;
+  box-shadow: 0 20px 50px -20px rgba(255, 107, 138, .35);
+}
+.lock-card h1 { font-size: 30px; line-height: 1.3; }
+.house { width: 92px; height: 92px; margin: 0 auto; }
+.family-dots { display: flex; justify-content: center; gap: 8px; }
+.family-dots span { font-family: var(--font-title); font-size: 15px; padding: 3px 10px; border-radius: 999px; color: #fff; }
+
+/* ─────────────────────────────────────────────
+   4) 윗부분 (제목 + 나는 누구?)
+   ───────────────────────────────────────────── */
+.top { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 14px; }
+.top h1 { font-size: clamp(28px, 5vw, 40px); line-height: 1.25; }
+.top h1 em { font-style: normal; color: var(--accent); }
+.whoami { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.whoami .label { color: var(--muted); font-size: 14px; }
+.who {
+  border: 2px solid var(--c); background: transparent; color: var(--c);
+  border-radius: 999px; padding: 5px 14px; font-family: var(--font-title); font-size: 16px;
+}
+.who[aria-pressed="true"] { background: var(--c); color: #fff; }
+.whoami.nudge { animation: nudge .5s ease 2; }
+@keyframes nudge { 50% { transform: translateX(6px); } }
+
+/* ─────────────────────────────────────────────
+   5) 달력 + 그날 이야기 (2칸 배치)
+   ───────────────────────────────────────────── */
+.main { display: grid; grid-template-columns: minmax(0, 1.6fr) minmax(0, 1fr); gap: 20px; align-items: start; }
+@media (max-width: 860px) { .main { grid-template-columns: minmax(0, 1fr); } }
+.panel { background: var(--surface); border-radius: var(--radius); padding: 18px; min-width: 0; }
+
+.cal-head { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-bottom: 12px; }
+.cal-head h2 { font-size: 28px; }
+.cal-head .nav { display: flex; gap: 6px; }
+.round { width: 38px; height: 38px; border-radius: 50%; border: 1.5px solid var(--line); background: var(--surface); font-size: 18px; }
+.grid { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 4px; }
+.dow { text-align: center; font-family: var(--font-title); color: var(--muted); padding: 4px 0; }
+.dow.sun { color: var(--sunday); } .dow.sat { color: var(--saturday); }
+.day {
+  position: relative; min-height: 92px; border-radius: 12px; border: 1.5px solid transparent;
+  background: var(--bg); padding: 5px; text-align: left; display: flex; flex-direction: column; gap: 3px;
+  overflow: hidden; min-width: 0;
+}
+.day.out { opacity: .38; }
+.day.today { background: var(--sun-soft); }
+.day.today .num { background: var(--sun); color: #2A2D45; }
+.day.selected { border-color: var(--accent); }
+.num { font-family: var(--font-title); font-size: 15px; width: 26px; height: 26px; border-radius: 50%; display: grid; place-items: center; font-variant-numeric: tabular-nums; }
+.day.sun .num { color: var(--sunday); } .day.sat .num { color: var(--saturday); }
+.chip {
+  font-size: 12px; line-height: 1.3; padding: 1px 6px; border-radius: 6px; color: #fff; background: var(--c);
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.more { font-size: 11px; color: var(--muted); }
+.thumb { position: absolute; top: 5px; right: 5px; width: 26px; height: 26px; border-radius: 50%; object-fit: cover; border: 2px solid var(--surface); }
+.dots { display: none; gap: 3px; flex-wrap: wrap; }
+.dots i { width: 7px; height: 7px; border-radius: 50%; background: var(--c); }
+@media (max-width: 640px) {
+  .day { min-height: 58px; padding: 4px; }
+  .chip, .more { display: none; }
+  .dots { display: flex; }
+  .thumb { width: 18px; height: 18px; top: 3px; right: 3px; }
+}
+
+/* 그날 이야기 */
+.day-panel { display: grid; gap: 18px; }
+.day-panel > h2 { font-size: 26px; }
+.day-panel h3 { font-size: 19px; display: flex; align-items: center; gap: 8px; }
+.day-panel h3 .tag { font-family: var(--font-body); font-size: 12px; background: var(--accent-soft); color: var(--accent); padding: 2px 8px; border-radius: 999px; }
+.block { display: grid; gap: 10px; }
+.list { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
+.item { display: flex; align-items: center; gap: 8px; padding: 8px 10px; border-radius: 12px; background: var(--bg); min-width: 0; }
+.item .time { font-variant-numeric: tabular-nums; color: var(--muted); font-size: 14px; }
+.item .title { flex: 1; min-width: 0; overflow-wrap: anywhere; }
+.badge { font-family: var(--font-title); font-size: 13px; color: #fff; background: var(--c); border-radius: 999px; padding: 1px 9px; flex: none; }
+.del { border: 0; background: transparent; color: var(--muted); font-size: 13px; padding: 4px 6px; border-radius: 8px; flex: none; }
+.del[data-armed] { background: var(--sunday); color: #fff; }
+.empty { color: var(--muted); font-size: 14px; padding: 6px 2px; }
+.row { display: flex; gap: 8px; flex-wrap: wrap; }
+.row .field { flex: 1 1 150px; }
+.row .field.time { flex: 0 1 130px; }
+
+.diary { border-radius: 14px; overflow: hidden; background: var(--bg); }
+.diary img { display: block; width: 100%; max-height: 360px; object-fit: cover; }
+.diary .body { padding: 10px 12px; display: grid; gap: 6px; }
+.diary .meta { display: flex; align-items: center; gap: 8px; }
+.diary .meta .grow { flex: 1; }
+.diary p { margin: 0; white-space: pre-wrap; overflow-wrap: anywhere; }
+.photo-pick { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.photo-pick label { border: 1.5px dashed var(--accent); color: var(--accent); border-radius: 12px; padding: 9px 14px; cursor: pointer; font-family: var(--font-title); }
+.photo-pick input { position: absolute; width: 1px; height: 1px; opacity: 0; }
+.preview { width: 64px; height: 64px; border-radius: 10px; object-fit: cover; }
+
+/* ─────────────────────────────────────────────
+   6) 가족 메모장 (포스트잇)
+   ───────────────────────────────────────────── */
+.memo-head { display: flex; align-items: baseline; justify-content: space-between; gap: 10px; flex-wrap: wrap; margin-bottom: 12px; }
+.memo-head h2 { font-size: 26px; }
+.memos { display: grid; grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); gap: 14px; }
+.note {
+  position: relative; background: color-mix(in srgb, var(--c) 16%, var(--surface));
+  border-top: 6px solid var(--c); border-radius: 6px 6px 14px 14px; padding: 12px 12px 10px;
+  display: grid; gap: 8px; min-width: 0;
+}
+.note:nth-child(odd) { transform: rotate(-.6deg); } .note:nth-child(even) { transform: rotate(.5deg); }
+.note p { margin: 0; white-space: pre-wrap; overflow-wrap: anywhere; }
+.note .meta { display: flex; align-items: center; gap: 6px; font-size: 12px; color: var(--muted); }
+.note .meta .grow { flex: 1; }
+.memo-form { display: grid; gap: 8px; margin-top: 14px; }
+
+.foot { display: flex; gap: 8px; justify-content: center; flex-wrap: wrap; }
+.status { text-align: center; color: var(--muted); font-size: 14px; }
+@media (prefers-reduced-motion: reduce) { * { animation: none !important; transition: none !important; } }
+</style>
+<style>[hidden]{display:none!important} body{margin:0} img{max-width:100%}</style>
+</head>
+<body>
+
+
+<!-- ═════════════ 화면 1: 비밀번호 ═════════════ -->
+<section id="lock" class="lock">
+  <form id="lockForm" class="lock-card">
+    <svg class="house" viewBox="0 0 100 100" aria-hidden="true">
+      <path d="M50 12 L90 46 L80 46 L80 88 L20 88 L20 46 L10 46 Z" fill="var(--accent)"/>
+      <rect x="40" y="60" width="20" height="28" rx="4" fill="var(--sun)"/>
+      <path d="M50 52 c-6 -9 -18 -2 -10 6 l10 9 l10 -9 c8 -8 -4 -15 -10 -6 z" fill="#fff" transform="translate(0 -18) scale(1)"/>
+    </svg>
+    <h1>사랑과 행복이<br>넘치는 우리가족 ❤️</h1>
+    <div class="family-dots">
+      <span style="background:var(--dad)">아빠</span><span style="background:var(--mom)">엄마</span>
+      <span style="background:var(--dongwook)">동욱</span><span style="background:var(--yushin)">유신</span>
+    </div>
+    <p id="lockMsg" class="hint">불러오는 중이에요…</p>
+    <input id="pw1" class="field" type="password" placeholder="비밀번호" autocomplete="current-password" hidden>
+    <input id="pw2" class="field" type="password" placeholder="비밀번호 한 번 더" autocomplete="new-password" hidden>
+    <p id="lockErr" class="err"></p>
+    <button id="lockBtn" class="btn" type="submit" hidden>들어가기</button>
+    <button id="cancelBtn" class="btn ghost" type="button" hidden>취소</button>
+  </form>
+</section>
+
+<!-- ═════════════ 화면 2: 가족 달력 ═════════════ -->
+<div id="app" class="wrap" hidden>
+  <header class="top">
+    <h1>사랑과 행복이<br>넘치는 <em>우리가족</em> ❤️</h1>
+    <div id="whoami" class="whoami"><span class="label">나는</span></div>
+  </header>
+
+  <div class="main">
+    <section class="panel" aria-label="달력">
+      <div class="cal-head">
+        <h2 id="monthTitle"></h2>
+        <div class="nav">
+          <button class="round" id="prev" aria-label="지난달">‹</button>
+          <button class="btn ghost" id="todayBtn">오늘</button>
+          <button class="round" id="next" aria-label="다음달">›</button>
+        </div>
+      </div>
+      <div class="grid" id="grid"></div>
+    </section>
+
+    <aside class="panel day-panel" aria-label="선택한 날">
+      <h2 id="dayTitle"></h2>
+
+      <div class="block">
+        <h3>일정</h3>
+        <ul class="list" id="eventList"></ul>
+        <form id="eventForm" class="row">
+          <input id="evTitle" class="field" placeholder="예: 할머니 생신 저녁" maxlength="60" required>
+          <input id="evTime" class="field time" type="time" aria-label="시간 (선택)">
+          <button class="btn" type="submit">추가</button>
+        </form>
+      </div>
+
+      <div class="block">
+        <h3>사진일기 <span class="tag">그날 있었던 일</span></h3>
+        <div id="diaryList" class="list"></div>
+        <form id="diaryForm" class="block">
+          <div class="photo-pick" id="photoPick">
+            <label for="photo">사진 고르기</label>
+            <input id="photo" type="file" accept="image/*">
+            <img id="preview" class="preview" alt="" hidden>
+            <span id="photoNote" class="hint"></span>
+          </div>
+          <textarea id="diaryText" class="field" placeholder="오늘 무슨 일이 있었나요?" maxlength="1000"></textarea>
+          <p id="diaryErr" class="err"></p>
+          <button id="diaryBtn" class="btn" type="submit">기록하기</button>
+        </form>
+      </div>
+    </aside>
+  </div>
+
+  <section class="panel" aria-label="가족 메모장">
+    <div class="memo-head">
+      <h2>가족 메모장</h2>
+      <p class="hint">장보기, 부탁, 하고 싶은 말을 붙여 두세요</p>
+    </div>
+    <div class="memos" id="memos"></div>
+    <form id="memoForm" class="memo-form">
+      <textarea id="memoText" class="field" placeholder="예: 우유랑 계란 사 오기!" maxlength="300" required></textarea>
+      <div><button class="btn" type="submit">메모 붙이기</button></div>
+    </form>
+  </section>
+
+  <p id="status" class="status"></p>
+  <div class="foot">
+    <button class="btn ghost" id="lockNow">잠그기</button>
+    <button class="btn ghost" id="changePw">비밀번호 바꾸기</button>
+  </div>
+</div>
+
+
+<script type="module">
+/* ═════════════════════════════════════════════
+   우리가족 달력 - Firebase 버전
+   - Authentication : 가족 비밀번호로 로그인
+   - Firestore      : 일정(events), 사진일기(diary), 메모(memos) 저장
+   사진은 작게 줄여서 사진일기 문서 안에 같이 저장해요.
+   ═════════════════════════════════════════════ */
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import {
+  getAuth, onAuthStateChanged, signInWithEmailAndPassword, signOut, updatePassword,
+} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+import {
+  getFirestore, collection, doc, addDoc, deleteDoc, onSnapshot, query, where,
+} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+/* ★★★ 1. Firebase 설정: Firebase 콘솔에서 복사한 값으로 바꿔 넣는 곳 ★★★ */
+const firebaseConfig = {
+  apiKey: "AIzaSyBmmMwe5x_XjzWxilqloP5qAff6a5rd_gs",
+  authDomain: "my-family-planer-176c5.firebaseapp.com",
+  projectId: "my-family-planer-176c5",
+  storageBucket: "my-family-planer-176c5.firebasestorage.app",
+  messagingSenderId: "418564999126",
+  appId: "1:418564999126:web:b03d62f1cde0ed8af1c677",
+};
+/* ★★★ 2. 가족 공용 계정 이메일 (Firebase에서 만든 사용자와 같아야 해요) ★★★ */
+const FAMILY_EMAIL = "family@woorifamily.kr";
+
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const fs = getFirestore(app);
+
+const MEMBERS = [
+  { name: "아빠", color: "var(--dad)" },
+  { name: "엄마", color: "var(--mom)" },
+  { name: "동욱", color: "var(--dongwook)" },
+  { name: "유신", color: "var(--yushin)" },
+];
+const colorOf = (name) => (MEMBERS.find((m) => m.name === name) || { color: "var(--muted)" }).color;
+const $ = (id) => document.getElementById(id);
+
+const store = {
+  get(k) { try { return localStorage.getItem(k); } catch { return null; } },
+  set(k, v) { try { localStorage.setItem(k, v); } catch {} },
+};
+
+const pad = (n) => String(n).padStart(2, "0");
+const keyOf = (d) => `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
+const DOW = ["일", "월", "화", "수", "목", "금", "토"];
+
+function el(tag, attrs = {}, ...kids) {
+  const n = document.createElement(tag);
+  for (const [k, v] of Object.entries(attrs)) {
+    if (k === "style") n.style.cssText = v;
+    else if (k.startsWith("on")) n.addEventListener(k.slice(2), v);
+    else if (v !== false && v != null) n.setAttribute(k, v === true ? "" : v);
+  }
+  for (const c of kids.flat()) if (c != null) n.append(c);
+  return n;
+}
+
+/* ───────── 앱 상태 ───────── */
+const today = new Date();
+const state = {
+  events: [], diary: [], memos: [],
+  view: new Date(today.getFullYear(), today.getMonth(), 1),
+  selected: keyOf(today),
+  me: store.get("family-me"),
+};
+
+/* ═════════════ 로그인 화면 ═════════════ */
+let lockMode = "enter"; // enter | change
+function showLock(mode, msg) {
+  lockMode = mode;
+  $("lock").hidden = false; $("app").hidden = true;
+  $("lockMsg").textContent = msg;
+  $("lockErr").textContent = "";
+  $("pw1").value = ""; $("pw2").value = "";
+  $("pw1").hidden = false;
+  $("pw2").hidden = mode !== "change";
+  $("lockBtn").hidden = false;
+  $("lockBtn").textContent = mode === "enter" ? "들어가기" : "비밀번호 바꾸기";
+  $("cancelBtn").hidden = mode !== "change";
+  setTimeout(() => $("pw1").focus(), 50);
+}
+
+$("lockForm").addEventListener("submit", async (e) => {
+  e.preventDefault();
+  const p1 = $("pw1").value, p2 = $("pw2").value;
+  if (!p1) return ($("lockErr").textContent = "비밀번호를 입력해 주세요.");
+  $("lockBtn").disabled = true;
+  try {
+    if (lockMode === "enter") {
+      await signInWithEmailAndPassword(auth, FAMILY_EMAIL, p1);
+      // 로그인에 성공하면 아래 onAuthStateChanged가 알아서 달력을 열어요.
+    } else {
+      if (p1.length < 6) { $("lockErr").textContent = "6글자 이상으로 정해 주세요."; return; }
+      if (p1 !== p2) { $("lockErr").textContent = "두 번 입력한 비밀번호가 서로 달라요."; return; }
+      await updatePassword(auth.currentUser, p1);
+      openApp();
+      $("status").textContent = "비밀번호를 바꿨어요. 가족에게도 알려 주세요!";
+    }
+  } catch (err) {
+    const c = err?.code || "";
+    $("lockErr").textContent =
+      c.includes("invalid-credential") || c.includes("wrong-password") ? "비밀번호가 달라요. 다시 해 볼까요?" :
+      c.includes("too-many-requests") ? "너무 많이 틀렸어요. 잠시 뒤에 다시 해 주세요." :
+      c.includes("requires-recent-login") ? "보안을 위해 잠갔다가 다시 들어와서 바꿔 주세요." :
+      "문제가 생겼어요: " + c;
+  } finally { $("lockBtn").disabled = false; }
+});
+$("cancelBtn").onclick = () => openApp();
+$("lockNow").onclick = () => signOut(auth);
+$("changePw").onclick = () => showLock("change", "새 비밀번호를 정해 주세요");
+
+// 로그인 상태가 바뀔 때마다 불려요 (한 번 로그인하면 이 기기에서는 계속 기억해요)
+onAuthStateChanged(auth, (user) => {
+  if (user) openApp();
+  else { stopListening(); showLock("enter", "가족 비밀번호를 입력해 주세요"); }
+});
+
+/* ═════════════ 데이터 실시간 구독 ═════════════ */
+let unsubs = [], unsubDiary = null, diaryRange = "";
+function stopListening() {
+  unsubs.forEach((u) => u()); unsubs = [];
+  if (unsubDiary) unsubDiary(); unsubDiary = null; diaryRange = "";
+}
+const showError = () => ($("status").textContent = "데이터를 불러오지 못했어요. 새로고침해 주세요.");
+
+function openApp() {
+  $("lock").hidden = true; $("app").hidden = false;
+  if (!unsubs.length) {
+    for (const name of ["events", "memos"]) {
+      unsubs.push(onSnapshot(collection(fs, name), (snap) => {
+        state[name] = snap.docs.map((d) => ({ id: d.id, ...d.data() }));
+        render();
+      }, showError));
+    }
+  }
+  listenDiary();
+  render();
+}
+
+// 사진일기는 사진이 들어 있어서 무거우니까, 지금 보는 달력 범위만 불러와요.
+function gridStart() {
+  const f = new Date(state.view.getFullYear(), state.view.getMonth(), 1);
+  return new Date(f.getFullYear(), f.getMonth(), 1 - f.getDay());
+}
+function listenDiary() {
+  const s = gridStart();
+  const from = keyOf(s), to = keyOf(new Date(s.getFullYear(), s.getMonth(), s.getDate() + 41));
+  if (diaryRange === from + to) return;
+  diaryRange = from + to;
+  if (unsubDiary) unsubDiary();
+  const q = query(collection(fs, "diary"), where("date", ">=", from), where("date", "<=", to));
+  unsubDiary = onSnapshot(q, (snap) => {
+    state.diary = snap.docs.map((d) => ({ id: d.id, ...d.data() }));
+    render();
+  }, showError);
+}
+
+/* ═════════════ 그리기 ═════════════ */
+function render() { renderWho(); renderCalendar(); renderDay(); renderMemos(); }
+
+function renderWho() {
+  const box = $("whoami");
+  box.replaceChildren(el("span", { class: "label" }, "나는"));
+  for (const m of MEMBERS) {
+    box.append(el("button", {
+      class: "who", style: `--c:${m.color}`, "aria-pressed": String(state.me === m.name),
+      onclick: () => { state.me = m.name; store.set("family-me", m.name); renderWho(); },
+    }, m.name));
+  }
+}
+
+const byTime = (a, b) => (a.time || "99").localeCompare(b.time || "99");
+const byCreated = (a, b) => (a.createdAt || 0) - (b.createdAt || 0);
+
+function renderCalendar() {
+  const y = state.view.getFullYear(), mo = state.view.getMonth();
+  $("monthTitle").textContent = `${y}년 ${mo + 1}월`;
+  const grid = $("grid");
+  grid.replaceChildren(...DOW.map((d, i) => el("div", { class: "dow" + (i === 0 ? " sun" : i === 6 ? " sat" : "") }, d)));
+  const s = gridStart();
+  const todayKey = keyOf(today);
+  for (let i = 0; i < 42; i++) {
+    const d = new Date(s.getFullYear(), s.getMonth(), s.getDate() + i);
+    const k = keyOf(d);
+    const evs = state.events.filter((e) => e.date === k).sort(byTime);
+    const photo = state.diary.find((x) => x.date === k && x.photo);
+    const cls = ["day",
+      d.getMonth() !== mo && "out", k === todayKey && "today", k === state.selected && "selected",
+      d.getDay() === 0 && "sun", d.getDay() === 6 && "sat"].filter(Boolean).join(" ");
+    grid.append(el("button", {
+      class: cls, "aria-label": `${d.getMonth() + 1}월 ${d.getDate()}일, 일정 ${evs.length}개`,
+      onclick: () => {
+        state.selected = k;
+        if (d.getMonth() !== mo) { state.view = new Date(d.getFullYear(), d.getMonth(), 1); listenDiary(); }
+        render();
+      },
+    },
+      el("span", { class: "num" }, String(d.getDate())),
+      photo ? el("img", { class: "thumb", src: photo.photo, alt: "" }) : null,
+      evs.slice(0, 2).map((e) => el("span", { class: "chip", style: `--c:${colorOf(e.who)}` }, e.title)),
+      evs.length > 2 ? el("span", { class: "more" }, `+${evs.length - 2}개 더`) : null,
+      el("span", { class: "dots" }, evs.map((e) => el("i", { style: `--c:${colorOf(e.who)}` }))),
+    ));
+  }
+}
+
+function renderDay() {
+  const [y, m, d] = state.selected.split("-").map(Number);
+  const date = new Date(y, m - 1, d);
+  $("dayTitle").textContent = `${m}월 ${d}일 ${DOW[date.getDay()]}요일`;
+
+  const evs = state.events.filter((e) => e.date === state.selected).sort(byTime);
+  $("eventList").replaceChildren(...(evs.length ? evs.map((e) =>
+    el("li", { class: "item" },
+      el("span", { class: "badge", style: `--c:${colorOf(e.who)}` }, e.who || "?"),
+      e.time ? el("span", { class: "time" }, e.time) : null,
+      el("span", { class: "title" }, e.title),
+      delButton(() => deleteDoc(doc(fs, "events", e.id))),
+    )) : [el("li", { class: "empty" }, "아직 일정이 없어요")]));
+
+  const ds = state.diary.filter((x) => x.date === state.selected).sort(byCreated);
+  $("diaryList").replaceChildren(...(ds.length ? ds.map((x) =>
+    el("article", { class: "diary" },
+      x.photo ? el("img", { src: x.photo, alt: `${x.who}의 사진일기`, loading: "lazy" }) : null,
+      el("div", { class: "body" },
+        x.text ? el("p", {}, x.text) : null,
+        el("div", { class: "meta" },
+          el("span", { class: "badge", style: `--c:${colorOf(x.who)}` }, x.who || "?"),
+          el("span", { class: "grow" }),
+          delButton(() => deleteDoc(doc(fs, "diary", x.id))),
+        ),
+      ),
+    )) : [el("p", { class: "empty" }, "이 날의 사진일기를 남겨 보세요")]));
+}
+
+function renderMemos() {
+  const ms = [...state.memos].sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
+  $("memos").replaceChildren(...(ms.length ? ms.map((x) =>
+    el("div", { class: "note", style: `--c:${colorOf(x.who)}` },
+      el("p", {}, x.text),
+      el("div", { class: "meta" },
+        el("span", { class: "badge", style: `--c:${colorOf(x.who)}` }, x.who || "?"),
+        el("span", { class: "grow" }, x.createdAt ? new Date(x.createdAt).toLocaleDateString("ko-KR", { month: "long", day: "numeric" }) : ""),
+        delButton(() => deleteDoc(doc(fs, "memos", x.id))),
+      ),
+    )) : [el("p", { class: "empty" }, "첫 메모를 붙여 보세요")]));
+}
+
+function delButton(onDelete) {
+  const b = el("button", { class: "del", type: "button" }, "삭제");
+  let timer;
+  b.onclick = async () => {
+    if (!b.hasAttribute("data-armed")) {
+      b.setAttribute("data-armed", ""); b.textContent = "정말 삭제?";
+      timer = setTimeout(() => { b.removeAttribute("data-armed"); b.textContent = "삭제"; }, 3000);
+      return;
+    }
+    clearTimeout(timer); b.disabled = true;
+    try { await onDelete(); } catch { b.disabled = false; b.textContent = "실패"; }
+  };
+  return b;
+}
+
+/* ═════════════ 추가하기 ═════════════ */
+function needMe() {
+  if (state.me) return false;
+  const w = $("whoami"); w.classList.remove("nudge"); void w.offsetWidth; w.classList.add("nudge");
+  $("status").textContent = "먼저 위에서 '나는'을 눌러 누구인지 골라 주세요";
+  return true;
+}
+
+$("eventForm").addEventListener("submit", async (e) => {
+  e.preventDefault();
+  if (needMe()) return;
+  const title = $("evTitle").value.trim();
+  if (!title) return;
+  await addDoc(collection(fs, "events"), { date: state.selected, title, time: $("evTime").value || "", who: state.me, createdAt: Date.now() });
+  $("evTitle").value = ""; $("evTime").value = "";
+});
+
+$("memoForm").addEventListener("submit", async (e) => {
+  e.preventDefault();
+  if (needMe()) return;
+  const text = $("memoText").value.trim();
+  if (!text) return;
+  await addDoc(collection(fs, "memos"), { text, who: state.me, createdAt: Date.now() });
+  $("memoText").value = "";
+});
+
+// 사진을 작게 줄여서 "글자(data URL)"로 바꿔요. Firestore 문서 하나는 1MB까지라서 그보다 작게 만들어요.
+function shrink(file, maxSide, quality) {
+  return new Promise((resolve, reject) => {
+    const img = new Image();
+    img.onload = () => {
+      const s = Math.min(1, maxSide / Math.max(img.width, img.height));
+      const c = document.createElement("canvas");
+      c.width = Math.round(img.width * s); c.height = Math.round(img.height * s);
+      c.getContext("2d").drawImage(img, 0, 0, c.width, c.height);
+      URL.revokeObjectURL(img.src);
+      resolve(c.toDataURL("image/jpeg", quality));
+    };
+    img.onerror = reject;
+    img.src = URL.createObjectURL(file);
+  });
+}
+async function photoToText(file) {
+  let url = await shrink(file, 1280, 0.8);
+  if (url.length > 800000) url = await shrink(file, 960, 0.65);
+  if (url.length > 800000) throw { code: "too_large" };
+  return url;
+}
+
+$("photo").addEventListener("change", () => {
+  const f = $("photo").files[0];
+  $("preview").hidden = !f;
+  if (f) $("preview").src = URL.createObjectURL(f);
+});
+
+$("diaryForm").addEventListener("submit", async (e) => {
+  e.preventDefault();
+  if (needMe()) return;
+  const file = $("photo").files[0];
+  const text = $("diaryText").value.trim();
+  if (!file && !text) { $("diaryErr").textContent = "사진이나 글 중 하나는 있어야 해요."; return; }
+  $("diaryErr").textContent = ""; $("diaryBtn").disabled = true; $("diaryBtn").textContent = "올리는 중…";
+  try {
+    const photo = file ? await photoToText(file) : "";
+    await addDoc(collection(fs, "diary"), { date: state.selected, text, photo, who: state.me, createdAt: Date.now() });
+    $("diaryText").value = ""; $("photo").value = ""; $("preview").hidden = true;
+  } catch (err) {
+    $("diaryErr").textContent = err?.code === "too_large" ? "사진이 너무 커요. 다른 사진으로 해 볼까요?" : "저장하지 못했어요. 잠시 뒤 다시 해 주세요.";
+  } finally { $("diaryBtn").disabled = false; $("diaryBtn").textContent = "기록하기"; }
+});
+
+/* ═════════════ 달 넘기기 ═════════════ */
+const moveMonth = (n) => { state.view = new Date(state.view.getFullYear(), state.view.getMonth() + n, 1); listenDiary(); render(); };
+$("prev").onclick = () => moveMonth(-1);
+$("next").onclick = () => moveMonth(1);
+$("todayBtn").onclick = () => { state.view = new Date(today.getFullYear(), today.getMonth(), 1); state.selected = keyOf(today); listenDiary(); render(); };
+
+</script>
+</body>
+</html>
