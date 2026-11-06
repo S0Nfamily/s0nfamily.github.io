@@ -307,7 +307,6 @@ textarea.field { resize: vertical; min-height: 70px; }
   <p id="status" class="status"></p>
   <div class="foot">
     <button class="btn ghost" id="lockNow">잠그기</button>
-    <button class="btn ghost" id="changePw">비밀번호 바꾸기</button>
   </div>
   <p class="madeby">made by 동욱</p>
 </div>
@@ -425,7 +424,6 @@ $("lockForm").addEventListener("submit", async (e) => {
 });
 $("cancelBtn").onclick = () => openApp();
 $("lockNow").onclick = () => signOut(auth);
-$("changePw").onclick = () => showLock("change", "새 비밀번호를 정해 주세요");
 
 // 로그인 상태가 바뀔 때마다 불려요 (한 번 로그인하면 이 기기에서는 계속 기억해요)
 onAuthStateChanged(auth, (user) => {
